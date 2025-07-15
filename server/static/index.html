@@ -1,0 +1,43 @@
+<html>
+  <head>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Mono:wght@100..900&family=Tuffy:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+    <link href="https://iosevka-webfonts.github.io/iosevka/Iosevka.css" rel="stylesheet"/>
+    <link rel="stylesheet" href="/static/style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  </head>
+  <body>
+    <div class="bar">
+      <h1>{{.PageTitle}}</h1>
+      <div class="btn-container">
+        <button class="btn-smooth btn-smooth-tertiary" onclick="copyToClipboard()">
+          Copy
+        </button>
+        <button class="btn-smooth btn-smooth-secondary" onclick="pasteToEditor()">
+          Paste
+        </button>
+        <button class="btn-smooth" onclick="downloadPasteValue();">
+          Download
+        </button>
+      </div>
+    </div>
+    <div class="content">
+      <div class="editor-container">
+        <div class="editor-wrapper">
+          <div class="line-numbers" id="lineNumbers">1</div>
+          <div class="editor-content">
+            <textarea
+              class="editor-textarea"
+              id="codeEditor"
+              placeholder="Start typing your code here..."
+              spellcheck="false"
+              >{{.ContentData}}</textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+  <script src="/static/index.js"></script>
+</html>
