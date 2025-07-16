@@ -187,7 +187,6 @@ func idHandler(w http.ResponseWriter,r *http.Request) {
 	addVisitor(ip)
 	storageMutex.RUnlock()
 
-	fmt.Printf("%.0f",time.Now().Sub(visitorStorage[ip].LastSeen).Seconds())
 	if time.Now().Sub(visitorStorage[ip].LastSeen).Seconds() < 30.0 && visitorStorage[ip].RequestCount > 6 {
 		util.LogWarn("Got too many requests in less than 30 seconds")
 		http.Error(w,"Too many requests",http.StatusTooManyRequests)
