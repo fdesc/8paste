@@ -52,6 +52,7 @@ func addVisitor(IP string) {
 }
 
 func uploadHandler(w http.ResponseWriter, r *http.Request) {
+	setSecurityHeaders(w)
 	if r.Method != http.MethodPost {
 		util.LogError("Got request with a different method instead of POST",nil)
 		http.Error(w,"Method not allowed",http.StatusMethodNotAllowed)
@@ -174,6 +175,7 @@ func servePageContent(w http.ResponseWriter,p service.Paste,target string) {
 }
 
 func idHandler(w http.ResponseWriter,r *http.Request) {
+	setSecurityHeaders(w)
 	id := strings.TrimPrefix(r.URL.Path,"/")
 	if id == "" {
 		util.LogError("Provided invalid ID for paste",nil)
@@ -227,6 +229,13 @@ func idHandler(w http.ResponseWriter,r *http.Request) {
 		servePageContent(w,paste,"static/index.html")
 	}
 
+}
+
+func setSecurityHeaders(w http.ResponseWriter) {
+	w.Header().Set("Strict-Transport-Security", "max-age=63072000; includeSubDomains; preload")
+	w.Header().Set("X-Frame-Options", "DENY")
+	w.Header().Set("X-Content-Type-Options", "nosniff")
+	w.Header().Set("Referrer-Policy", "strict-origin-when-cross-origin")
 }
 
 func expirationLoop() {
