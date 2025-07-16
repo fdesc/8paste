@@ -149,6 +149,8 @@
         document.open();
         document.write(await response.text())
         document.close();
+      } else if (response.status === 429) {
+        textInput.placeholder = 'Too many requests!';
       } else {
         textInput.placeholder = 'Incorrect!';
       }

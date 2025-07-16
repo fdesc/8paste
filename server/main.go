@@ -16,19 +16,52 @@ import (
 )
 
 
-var pasteStorage = make(map[string]service.Paste)
-var expirationStorage = make(map[string]time.Time)
-var storageMutex = &sync.RWMutex{}
+type Visitor struct {
+	IP           string
+	LastSeen     time.Time
+	RequestCount int
+}
 
 type PageData struct {
 	PageTitle   string
 	ContentData string
 }
 
+var pasteStorage = make(map[string]service.Paste)
+var expirationStorage = make(map[string]time.Time)
+var visitorStorage = make(map[string]*Visitor)
+var storageMutex = &sync.RWMutex{}
+
+func getIP(r *http.Request) string {
+	f := r.Header.Get("X-Forwarded-For")
+	if f != "" {
+		return strings.Split(f,",")[0]
+	}
+	return r.RemoteAddr
+}
+
+func addVisitor(IP string) {
+	v,exists := visitorStorage[IP]
+	if !exists {
+		v = &Visitor{}
+		v.IP = IP
+		v.LastSeen = time.Now()
+		visitorStorage[IP] = v
+	}
+	v.RequestCount++
+}
+
 func uploadHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		util.LogError("Got request with a different method instead of POST",nil)
 		http.Error(w,"Method not allowed",http.StatusMethodNotAllowed)
+		return
+	}
+	ip := getIP(r)
+	addVisitor(ip)
+	if time.Now().Sub(visitorStorage[ip].LastSeen).Seconds() < 30.0 && visitorStorage[ip].RequestCount > 6 {
+		util.LogError("Got too many requests in less than 30 seconds",nil)
+		http.Error(w,"Too many requests",http.StatusTooManyRequests)
 		return
 	}
 
@@ -150,7 +183,16 @@ func idHandler(w http.ResponseWriter,r *http.Request) {
 
 	storageMutex.RLock()
 	paste,exists := pasteStorage[id]
+	ip := getIP(r)
+	addVisitor(ip)
 	storageMutex.RUnlock()
+
+	fmt.Printf("%.0f",time.Now().Sub(visitorStorage[ip].LastSeen).Seconds())
+	if time.Now().Sub(visitorStorage[ip].LastSeen).Seconds() < 30.0 && visitorStorage[ip].RequestCount > 6 {
+		util.LogWarn("Got too many requests in less than 30 seconds")
+		http.Error(w,"Too many requests",http.StatusTooManyRequests)
+		return
+	}
 
 	if !exists {
 		util.LogError("Got non-existent Paste ID",nil)
