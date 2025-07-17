@@ -30,13 +30,20 @@ type Paste struct {
 	Content []byte     `json:"-"`
 }
 
-func CreatePaste(data []byte) Paste {
+func CreatePaste(data []byte,title string,temp bool,isfile bool,sealed bool) Paste {
 	var p Paste = Paste{}
 	var err error
 	info := PasteInfo{}
 	info.CreationDate = time.Now()
 	utime := time.UnixMilli(info.CreationDate.UnixMilli()).String()
-	info.Title = "paste-"+utime
+	if title == "" {
+		info.Title = "paste-"+utime
+	} else {
+		info.Title = title
+	}
+	info.IsFile = isfile
+	info.Temporary = temp
+	info.Sealed = sealed
 	info.ID,err = uuid.NewRandom()
 	if err != nil {
 		util.LogError("Failed to generate UUID for PasteInfo",err)
