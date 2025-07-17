@@ -1,15 +1,15 @@
 package main
 
 import (
-	"io"
+	"bytes"
+	"encoding/json"
 	"fmt"
+	"html/template"
+	"io"
+	"net/http"
+	"strings"
 	"sync"
 	"time"
-	"bytes"
-	"strings"
-	"net/http"
-	"encoding/json"
-	"html/template"
 
 	"paste/service"
 	"paste/util"
@@ -63,15 +63,16 @@ func servePageContent(w http.ResponseWriter,p service.Paste,target string) {
 
 	data := PageData{
 		PageTitle: p.Info.Title,
-		ContentData: string(p.Content),
 	}
 
 	if p.Info.IsFile {
 		data.PreviewTextDisplay = "block"
 		data.PreviewDisplay = "none"
+		data.ContentData = ""
 	} else {
 		data.PreviewTextDisplay = "none"
 		data.PreviewDisplay = "block"
+		data.ContentData = string(p.Content)
 	}
 
 	tmpl.Execute(w,data)
@@ -181,6 +182,85 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
         "id": p.Info.ID.String(),
     })
 	util.LogInfo("Uploaded paste")
+}
+
+func downloadHandler(w http.ResponseWriter,r *http.Request) {
+	setSecurityHeaders(w);
+	if r.Method != http.MethodPost {
+		util.LogError("Got request with a different method instead of POST",nil)
+		http.Error(w,"Method not allowed",http.StatusMethodNotAllowed)
+		return
+	}
+
+	storageMutex.RLock()
+	ip := getIP(r)
+	addVisitor(ip)
+	storageMutex.RUnlock()
+
+	if time.Now().Sub(visitorStorage[ip].LastSeen).Seconds() < 30.0 && visitorStorage[ip].RequestCount > 6 {
+		util.LogWarn("Got too many requests in less than 30 seconds")
+		http.Error(w,"Too many requests",http.StatusTooManyRequests)
+		return
+	}
+
+	var err error
+	err = r.ParseMultipartForm(10 << 20)
+	if err != nil {
+		if err == http.ErrNotMultipart {
+			util.LogError("Invalid Content-Type received",err)
+			http.Error(w,err.Error(),http.StatusBadRequest)
+			return
+		}
+		util.LogError("Failed to parse form",err)
+		http.Error(w,err.Error(),http.StatusBadRequest)
+		return
+	}
+
+	id := struct {
+		ID string `json:"id"`
+	}{}
+
+	idjson := ""
+	values := r.MultipartForm.Value["id"]
+	if len(values) > 0 {
+		idjson = values[0]
+	}
+	if idjson == "" {
+		util.LogError("Got missing ID",nil)
+		http.Error(w,"ID is required",http.StatusBadRequest)
+		return
+	}
+
+	d := json.NewDecoder(strings.NewReader(idjson))
+	d.DisallowUnknownFields()
+	err = d.Decode(&id)
+	if err != nil {
+		util.LogError("Failed to unmarshal JSON",err)
+		http.Error(w,err.Error(),http.StatusBadRequest)
+		return
+	}
+
+	p,exists := pasteStorage[id.ID]
+	if !exists {
+		util.LogError("Got non-existent Paste ID",nil)
+		http.Error(w,"Not found",http.StatusNotFound)
+		return
+	}
+
+	if p.Info.Sealed {
+		password := r.FormValue("password")
+		pieces := strings.Split(string(p.Info.Secrets),":")
+		if len(pieces) != 2 || !service.VerifyPassword(pieces[0],pieces[1],password) || password == "" {
+			util.LogError("Invalid password submitted",nil)
+			http.Error(w, "Invalid password", http.StatusUnauthorized)
+            return
+		}
+	}
+
+	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment;filename=%s",p.Info.Title))
+	w.Header().Set("Content-Type", "application/octet-stream")
+	io.Copy(w,bytes.NewBuffer(p.Content))
+	util.LogInfo("Paste downloaded by client")
 }
 
 func infoHandler(w http.ResponseWriter,r *http.Request) {
@@ -338,6 +418,7 @@ func main() {
 	http.Handle("/static/",http.StripPrefix("/static/",http.FileServer(http.Dir("./static"))))
 	http.HandleFunc("/upload",uploadHandler)
 	http.HandleFunc("/info",infoHandler)
+	http.HandleFunc("/download",downloadHandler)
 	http.HandleFunc("/",idHandler)
 
 	port := "8080"

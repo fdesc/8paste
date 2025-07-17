@@ -146,6 +146,7 @@
       });
       textInput.value = '';
       if (response.ok) {
+        sessionStorage.setItem('tmp',sanitizedInput);
         document.open();
         document.write(await response.text())
         document.close();
