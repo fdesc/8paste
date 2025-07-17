@@ -2,9 +2,11 @@ const editor = document.getElementById('codeEditor');
 const lineNumbers = document.getElementById('lineNumbers');
 const editorContent = document.querySelector('.editor-content');
 
-function downloadPasteValue() {
+async function downloadPasteValue() {
+  let currentlink = window.location.href;
+  const arr = currentlink.split("/");
   const text = editor.value;
-  const filename = 'paste.txt';
+  const filename = 'paste-'+arr[arr.length-1];
   const blob = new Blob([text], { type: 'text/plain' });
   const link = document.createElement('a');
   link.href = URL.createObjectURL(blob);

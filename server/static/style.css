@@ -21,6 +21,7 @@ h1 {
 }
 
 body {
+  background-color: oklch(0.209 0 0);
   overflow: hidden;
   margin: 0;
   padding: 0;

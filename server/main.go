@@ -1,15 +1,15 @@
 package main
 
 import (
-	"bytes"
-	"encoding/json"
-	"fmt"
-	"html/template"
 	"io"
-	"net/http"
-	"strings"
+	"fmt"
 	"sync"
 	"time"
+	"bytes"
+	"strings"
+	"net/http"
+	"encoding/json"
+	"html/template"
 
 	"paste/service"
 	"paste/util"
@@ -23,8 +23,10 @@ type Visitor struct {
 }
 
 type PageData struct {
-	PageTitle   string
-	ContentData string
+	PageTitle   	   string
+	ContentData 	   string
+	PreviewDisplay     string
+	PreviewTextDisplay string
 }
 
 var pasteStorage = make(map[string]service.Paste)
@@ -49,6 +51,30 @@ func addVisitor(IP string) {
 		visitorStorage[IP] = v
 	}
 	v.RequestCount++
+}
+
+func servePageContent(w http.ResponseWriter,p service.Paste,target string) {
+	tmpl,err := template.ParseFiles(target)
+	if err != nil {
+		util.LogError("Failed to parse HTML",err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	data := PageData{
+		PageTitle: p.Info.Title,
+		ContentData: string(p.Content),
+	}
+
+	if p.Info.IsFile {
+		data.PreviewTextDisplay = "block"
+		data.PreviewDisplay = "none"
+	} else {
+		data.PreviewTextDisplay = "none"
+		data.PreviewDisplay = "block"
+	}
+
+	tmpl.Execute(w,data)
 }
 
 func uploadHandler(w http.ResponseWriter, r *http.Request) {
@@ -118,12 +144,12 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w,err.Error(),http.StatusInternalServerError)
 			return
 		}
-		p = service.CreatePaste(buf.Bytes())
+		p = service.CreatePaste(buf.Bytes(),info.Title,info.Temporary,info.IsFile,info.Sealed)
 	} else {
-		p = service.CreatePaste([]byte(r.FormValue("content")))
+		p = service.CreatePaste([]byte(r.FormValue("content")),info.Title,info.Temporary,info.IsFile,info.Sealed)
 	}
 
-	if info.Sealed {
+	if p.Info.Sealed {
 		password := r.FormValue("password")
 		if password == "" {
 			util.LogError("Attempted to submit empty password",nil)
@@ -137,8 +163,7 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		p.Info.Secrets = []byte(fmt.Sprintf("%s:%s",hash,salt))
 	}
-	if info.Temporary { p.SetExpirationDate(info.Duration) }
-	if p.Info.Title != info.Title && info.Title != "" { p.SetTitle(info.Title) }
+	if p.Info.Temporary { p.SetExpirationDate(info.Duration) }
 
 	if err != nil {
 		util.LogError("Failed to upload paste content",err)
@@ -158,20 +183,71 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 	util.LogInfo("Uploaded paste")
 }
 
-func servePageContent(w http.ResponseWriter,p service.Paste,target string) {
-	tmpl,err := template.ParseFiles(target)
-	if err != nil {
-		util.LogError("Failed to parse HTML",err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+func infoHandler(w http.ResponseWriter,r *http.Request) {
+	setSecurityHeaders(w)
+	if r.Method != http.MethodPost {
+		util.LogError("Got request with a different method instead of POST",nil)
+		http.Error(w,"Method not allowed",http.StatusMethodNotAllowed)
 		return
 	}
 
-	data := PageData{
-		PageTitle: p.Info.Title,
-		ContentData: string(p.Content),
+	storageMutex.RLock()
+	ip := getIP(r)
+	addVisitor(ip)
+	storageMutex.RUnlock()
+
+	if time.Now().Sub(visitorStorage[ip].LastSeen).Seconds() < 30.0 && visitorStorage[ip].RequestCount > 6 {
+		util.LogWarn("Got too many requests in less than 30 seconds")
+		http.Error(w,"Too many requests",http.StatusTooManyRequests)
+		return
 	}
 
-	tmpl.Execute(w,data)
+	var err error
+	err = r.ParseMultipartForm(10 << 20)
+	if err != nil {
+		if err == http.ErrNotMultipart {
+			util.LogError("Invalid Content-Type received",err)
+			http.Error(w,err.Error(),http.StatusBadRequest)
+			return
+		}
+		util.LogError("Failed to parse form",err)
+		http.Error(w,err.Error(),http.StatusBadRequest)
+		return
+	}
+
+	id := struct {
+		ID string `json:"id"`
+	}{}
+
+	idjson := ""
+	values := r.MultipartForm.Value["id"]
+	if len(values) > 0 {
+		idjson = values[0]
+	}
+	if idjson == "" {
+		util.LogError("Got missing ID",nil)
+		http.Error(w,"ID is required",http.StatusBadRequest)
+		return
+	}
+
+	d := json.NewDecoder(strings.NewReader(idjson))
+	d.DisallowUnknownFields()
+	err = d.Decode(&id)
+	if err != nil {
+		util.LogError("Failed to unmarshal JSON",err)
+		http.Error(w,err.Error(),http.StatusBadRequest)
+		return
+	}
+
+	p,exists := pasteStorage[id.ID]
+	if !exists {
+		util.LogError("Got non-existent Paste ID",nil)
+		http.Error(w,"Not found",http.StatusNotFound)
+		return
+	}
+
+    w.WriteHeader(http.StatusCreated)
+    json.NewEncoder(w).Encode(p.Info)
 }
 
 func idHandler(w http.ResponseWriter,r *http.Request) {
@@ -201,12 +277,12 @@ func idHandler(w http.ResponseWriter,r *http.Request) {
 		return
 	}
 
-	if paste.Info.IsFile {
+	/*if paste.Info.IsFile {
 		w.Header().Set("Content-Disposition", fmt.Sprintf("attachment;filename=%s",paste.Info.Title))
 		w.Header().Set("Content-Type", "application/octet-stream")
 	} else {
 		w.Header().Set("Content-Type","text/plain")
-	}
+	}*/
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
@@ -261,6 +337,7 @@ func main() {
 	go expirationLoop()
 	http.Handle("/static/",http.StripPrefix("/static/",http.FileServer(http.Dir("./static"))))
 	http.HandleFunc("/upload",uploadHandler)
+	http.HandleFunc("/info",infoHandler)
 	http.HandleFunc("/",idHandler)
 
 	port := "8080"
