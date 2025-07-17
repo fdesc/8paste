@@ -18,6 +18,9 @@
         <button class="btn-smooth btn-smooth-secondary" onclick="pasteToEditor()">
           Paste
         </button>
+        <button class="btn-smooth btn-smooth-quaternary" onclick="openModal()">
+          Upload
+        </button>
         <button class="btn-smooth" onclick="downloadPasteValue();">
           Download
         </button>
@@ -25,8 +28,7 @@
     </div>
     <div class="content">
       <div class="editor-container">
-        <p style="display: {{.PreviewTextDisplay}};">Cannot preview file.</p>
-        <div class="editor-wrapper" style="display: {{.PreviewDisplay}}">
+        <div class="editor-wrapper">
           <div class="line-numbers" id="lineNumbers">1</div>
           <div class="editor-content">
             <textarea
@@ -39,6 +41,101 @@
         </div>
       </div>
     </div>
+    <div class="modal-overlay" id="smallModalOverlay">
+      <div class="modal small-modal" id="smallModal">
+        <p id="smallModalText"></p>
+        <button class="btn-smooth" onclick="closeSmallModal()">Close</button>
+      </div>
+    </div>
+    <div class="modal-overlay" id="modalOverlay">
+      <div class="modal">
+        <div class="modal-header">
+          <h1 class="modal-title">Upload</h1>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <p class="form-label">Paste content</p>
+            <select class="form-select" id="mainSelect" onchange="handleSelectChange()">
+              <option value="text">Current text</option>
+              <option value="file">File</option>
+            </select>
+
+            <div class="file-upload-container" id="fileUploadContainer">
+              <p class="btn-smooth" id="fileBtn" for="fileInput" onclick="handleFileBtnClick()">
+                Choose File
+                <input type="file" id="dialog" class="file-input" style="display: none;">
+              </p>
+              <span id="fileName" style="color: white; font-size: 14px; font-family: 'Tuffy', sans-serif;">No file chosen</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <p class="form-label">Title</p>
+            <input type="text" class="form-input" placeholder="Enter here...">
+          </div>
+
+          <div class="form-group">
+            <p class="form-label">Duration</p>
+            <div class="radio-group">
+              <div class="radio-item">
+                <input type="radio" id="timeSelect" name="timeFormat" class="radio-input" onchange="handleRadioChange()">
+                <p for="timeSelect" class="radio-label">Temporary</p>
+              </div>
+              <div class="radio-item">
+                <input type="radio" id="inputSelect" name="timeFormat" value="input" class="radio-input" checked onchange="handleRadioChange()">
+                <p class="radio-label">Infinite</p>
+              </div>
+            </div>
+
+            <div class="time-selectors" id="timeSelectors">
+              <div class="time-selector">
+                <p>Hour</p>
+                <select id="hourSelect">
+                  <option value="">--</option>
+                </select>
+              </div>
+              <div class="time-selector">
+                <p>Minute</p>
+                <select id="minuteSelect">
+                  <option value="">--</option>
+                </select>
+              </div>
+              <div class="time-selector">
+                <p>Second</p>
+                <select id="secondSelect">
+                  <option value="">--</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="input-container" id="inputContainer">
+              <input type="text" class="form-input" placeholder="Enter time format...">
+            </div>
+          </div>
+          <div class="form-group">
+            <p class="form-label">Password protected</p>
+            <div class="radio-group">
+              <div class="radio-item">
+                <input type="radio" id="sealYes" name="sealOption" value="yes" class="radio-input" onchange="handleSealChange()">
+                <p for="sealYes" class="radio-label">Yes</p>
+              </div>
+              <div class="radio-item">
+                <input type="radio" id="sealNo" name="sealOption" value="no" class="radio-input" checked onchange="handleSealChange()">
+                <p for="sealNo" class="radio-label">No</p>
+              </div>
+            </div>
+            <div class="input-container" id="sealInputContainer">
+              <input type="password" class="form-input" placeholder="Enter here...">
+            </div>
+          </div>
+
+        <div class="modal-footer">
+          <p class="modal-footer-info" id="footer-alert" style="display: none;">Invalid duration</p>
+          <button class="btn-smooth btn-smooth-quaternary" onclick="closeModal()">Cancel</button>
+          <button class="btn-smooth btn-smooth-tertiary" onclick="saveInfo()">Upload</button>
+        </div>
+      </div>
+    </div>
+    <script src="/static/index.js"></script>
   </body>
-  <script src="/static/index.js"></script>
 </html>
