@@ -3,8 +3,6 @@ package service
 import (
 	"crypto/rand"
 	"encoding/hex"
-	"strconv"
-	"strings"
 	"time"
 
 	"paste/util"
@@ -74,27 +72,13 @@ func (p* Paste) Seal(password string) (string,string,error) {
 
 func (p* Paste) SetExpirationDate(duration string) {
 	p.Info.Duration = duration
-	var err error
-	var hour int
-	var minute int
-	var second int
-	s := strings.TrimSpace(p.Info.Duration)
-	for i := 0; i < len(s); i++ {
-		if s[i] == 'h' {
-			hour,err = strconv.Atoi(string(s[i-1]))
-		} else if s[i] == 'm' {
-			minute,err = strconv.Atoi(string(s[i-1]))
-		} else if s[i] == 's' {
-			second,err = strconv.Atoi(string(s[i-1]))
-		}
-	}
+	d,err := time.ParseDuration(p.Info.Duration)
 	if err != nil {
-		util.LogError("Failed to convert string to int",err)
+		util.LogError("Failed to parse duration",err)
 		return
 	}
 	p.Info.Temporary = true
-	totalSeconds := 3600*hour + 60*minute + second
-	t := p.Info.CreationDate.Add(time.Second * time.Duration(totalSeconds))
+	t := p.Info.CreationDate.Add(d)
 	p.Info.ExpirationDate = &t
 
 }
