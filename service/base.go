@@ -5,7 +5,7 @@ import (
 	"encoding/hex"
 	"time"
 
-	"paste/util"
+	"github.com/fdesc/8paste/util"
 
 	"github.com/google/uuid"
 	"golang.org/x/crypto/blake2b"

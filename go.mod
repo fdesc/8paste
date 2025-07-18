@@ -1,4 +1,4 @@
-module paste
+module github.com/fdesc/8paste
 
 go 1.24.4
 

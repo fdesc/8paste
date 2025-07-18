@@ -13,8 +13,8 @@ import (
 	"fmt"
 	"io"
 
-	"paste/service"
-	"paste/util"
+	"github.com/fdesc/8paste/service"
+	"github.com/fdesc/8paste/util"
 )
 
 

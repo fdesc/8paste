@@ -12,8 +12,8 @@ import (
 	"io"
 	"os"
 
-	"paste/service"
-	"paste/util"
+	"github.com/fdesc/8paste/service"
+	"github.com/fdesc/8paste/util"
 )
 
 func getPasteInfo(id string,source string) service.PasteInfo {
