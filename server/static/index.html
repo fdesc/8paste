@@ -12,16 +12,16 @@
     <div class="bar">
       <h1>{{.PageTitle}}</h1>
       <div class="btn-container">
-        <button class="btn-smooth btn-smooth-tertiary" onclick="copyToClipboard()">
+        <button id="copyButton" class="btn-smooth btn-smooth-tertiary">
           Copy
         </button>
-        <button class="btn-smooth btn-smooth-secondary" onclick="pasteToEditor()">
+        <button id="pasteButton" class="btn-smooth btn-smooth-secondary">
           Paste
         </button>
-        <button class="btn-smooth btn-smooth-quaternary" onclick="openModal()">
+        <button id="uploadButton" class="btn-smooth btn-smooth-quaternary">
           Upload
         </button>
-        <button class="btn-smooth" onclick="downloadPasteValue();">
+        <button id="downloadButton" class="btn-smooth">
           Download
         </button>
       </div>
@@ -44,7 +44,7 @@
     <div class="modal-overlay" id="smallModalOverlay">
       <div class="modal small-modal" id="smallModal">
         <p id="smallModalText"></p>
-        <button class="btn-smooth" onclick="closeSmallModal()">Close</button>
+        <button id="closeSmallModalButton" class="btn-smooth">Close</button>
       </div>
     </div>
     <div class="modal-overlay" id="modalOverlay">
@@ -55,17 +55,17 @@
         <div class="modal-body">
           <div class="form-group">
             <p class="form-label">Paste content</p>
-            <select class="form-select" id="mainSelect" onchange="handleSelectChange()">
+            <select class="form-select" id="mainSelect">
               <option value="text">Current text</option>
               <option value="file">File</option>
             </select>
 
             <div class="file-upload-container" id="fileUploadContainer">
-              <p class="btn-smooth" id="fileBtn" for="fileInput" onclick="handleFileBtnClick()">
+              <p class="btn-smooth" id="fileBtn" for="fileInput">
                 Choose File
-                <input type="file" id="dialog" class="file-input" style="display: none;">
+                <input type="file" id="dialog" class="file-input">
               </p>
-              <span id="fileName" style="color: white; font-size: 14px; font-family: 'Tuffy', sans-serif;">No file chosen</span>
+              <span id="fileName">No file chosen</span>
             </div>
           </div>
 
@@ -78,11 +78,11 @@
             <p class="form-label">Duration</p>
             <div class="radio-group">
               <div class="radio-item">
-                <input type="radio" id="timeSelect" name="timeFormat" class="radio-input" onchange="handleRadioChange()">
+                <input type="radio" id="timeSelect" name="timeFormat" class="radio-input">
                 <p for="timeSelect" class="radio-label">Temporary</p>
               </div>
               <div class="radio-item">
-                <input type="radio" id="inputSelect" name="timeFormat" value="input" class="radio-input" checked onchange="handleRadioChange()">
+                <input type="radio" id="inputSelect" name="timeFormat" value="input" class="radio-input" checked>
                 <p class="radio-label">Infinite</p>
               </div>
             </div>
@@ -130,9 +130,9 @@
           </div>
 
         <div class="modal-footer">
-          <p class="modal-footer-info" id="footer-alert" style="display: none;">Invalid duration</p>
-          <button class="btn-smooth btn-smooth-quaternary" onclick="closeModal()">Cancel</button>
-          <button class="btn-smooth btn-smooth-tertiary" onclick="saveInfo()">Upload</button>
+          <p class="modal-footer-info" id="footer-alert">Invalid duration</p>
+          <button id="closeModalButton" class="btn-smooth btn-smooth-quaternary">Cancel</button>
+          <button id="saveInfoButton" class="btn-smooth btn-smooth-tertiary">Upload</button>
         </div>
       </div>
     </div>

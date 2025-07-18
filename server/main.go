@@ -323,6 +323,14 @@ func setSecurityHeaders(w http.ResponseWriter) {
 	w.Header().Set("X-Frame-Options", "DENY")
 	w.Header().Set("X-Content-Type-Options", "nosniff")
 	w.Header().Set("Referrer-Policy", "strict-origin-when-cross-origin")
+	w.Header().Set("Content-Security-Policy",
+	"default-src 'self'; " +
+	"script-src 'self'; " +
+	"style-src 'self' https://fonts.googleapis.com https://iosevka-webfonts.github.io; " +
+	"font-src 'self' https://fonts.gstatic.com https://iosevka-webfonts.github.io; " +
+	"object-src 'none'; " +
+	"base-uri 'self'; " +
+	"form-action 'self'")
 }
 
 func getIP(r *http.Request) string {

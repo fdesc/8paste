@@ -43,6 +43,18 @@ async function downloadPasteValue() {
 }
 
 // frontend related
+document.getElementById('copyButton').addEventListener('click', copyToClipboard);
+document.getElementById('pasteButton').addEventListener('click', pasteToEditor);
+document.getElementById('uploadButton').addEventListener('click', openModal);
+document.getElementById('downloadButton').addEventListener('click', downloadPasteValue);
+document.getElementById('closeSmallModalButton').addEventListener('click', closeSmallModal);
+document.getElementById('closeModalButton').addEventListener('click', closeModal);
+document.getElementById('saveInfoButton').addEventListener('click', saveInfo);
+document.getElementById('fileBtn').addEventListener('click', handleFileBtnClick);
+document.getElementById('mainSelect').addEventListener('change', handleSelectChange);
+document.getElementById('timeSelect').addEventListener('change', handleRadioChange);
+document.getElementById('inputSelect').addEventListener('change', handleRadioChange);
+
 
 // modal start
 function initializeTimeSelectors() {
@@ -80,20 +92,6 @@ function handleSelectChange() {
     fileContainer.classList.remove('active');
   }
 }
-
-/*document.getElementById('dialog').addEventListener('change',function(e) {
-  const fileName = document.getElementById('fileName');
-
-  if (e.target.files.length > 0) {
-    const file = e.target.files[0];
-
-    fileName.innerHTML = `
-      <span id="fileName" style="color: white; font-size: 14px; font-family: 'Tuffy', sans-serif;">${file.name}</span>
-      `;
-  } else {
-    fileName.innerHTML = `<span id="fileName" style="color: white; font-size: 14px; font-family: 'Tuffy', sans-serif;">No file chosen</span>`;
-  }
-})*/
 
 function handleRadioChange() {
   const timeRadio = document.getElementById('timeSelect');
@@ -161,7 +159,7 @@ async function saveInfo() {
   }
 
   let a = document.getElementById("footer-alert");
-  if (duration === 'hms') {
+  if ((timeFormat === 'timeSelect') && (duration === 'hms' || duration === '')) {
     a.style.display = 'block';
     return;
   } else {
@@ -242,16 +240,34 @@ function handleFileBtnClick() {
   }
 }
 
+function resetModalFields() {
+  document.querySelectorAll('.modal input[type="text"]').forEach(input => input.value = '');
+  document.querySelectorAll('.modal input[type="password"]').forEach(input => input.value = '');
+  const fileInput = document.getElementById('dialog');
+  if (fileInput) fileInput.value = '';
+  const fileName = document.getElementById('fileName');
+  if (fileName) fileName.textContent = 'No file chosen';
+  document.querySelectorAll('.modal select').forEach(select => select.selectedIndex = 0);
+  const infiniteRadio = document.getElementById('inputSelect');
+  if (infiniteRadio) infiniteRadio.checked = true;
+  const sealNoRadio = document.getElementById('sealNo');
+  if (sealNoRadio) sealNoRadio.checked = true;
+  const footerAlert = document.getElementById('footer-alert');
+  if (footerAlert) footerAlert.style.display = 'none';
+}
+
 function openModal() {
   const overlay = document.getElementById('modalOverlay');
   overlay.classList.add('active');
   document.body.style.overflow = 'hidden';
+  resetModalFields();
 }
 
 function closeModal() {
   const overlay = document.getElementById('modalOverlay');
   overlay.classList.remove('active');
   document.body.style.overflow = 'auto';
+  resetModalFields();
 }
 
 function openSmallModal(text) {
@@ -297,11 +313,6 @@ function updateLineNumbers() {
     numbersHtml += i + '\n';
   }
   lineNumbers.textContent = numbersHtml.slice(0, -1);
-
-  /*setTimeout(() => {
-    const editorHeight = editor.scrollHeight;
-    lineNumbers.style.height = editorHeight + 'px';
-  }, 0);*/
 }
 
 function syncScroll() {
