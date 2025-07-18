@@ -1,107 +1,15 @@
-<html style="background-color: oklch(0.209 0 0);">
+<html>
   <head>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Mono:wght@100..900&family=Tuffy:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
     <link href="https://iosevka-webfonts.github.io/iosevka/Iosevka.css" rel="stylesheet"/>
+    <link rel="stylesheet" href="/static/locked.css">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-        .textbox-container {
-          margin: 0 auto;
-          position: relative;
-          width: 100%;
-          max-width: 400px;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-        }
-
-        .input-wrapper {
-          position: relative;
-          display: flex;
-          align-items: center;
-          background: rgba(255, 255, 255, 0.1);
-          border: 2px solid rgba(255, 255, 255, 0.2);
-          border-radius: 16px;
-          padding: 4px;
-          backdrop-filter: blur(10px);
-          transition: all 0.3s ease;
-        }
-
-        .input-wrapper:hover {
-          border-color: rgba(255, 255, 255, 0.3);
-          background: rgba(255, 255, 255, 0.15);
-        }
-
-        .input-wrapper:focus-within {
-          border-color: rgba(99, 102, 241, 0.8);
-          background: rgba(255, 255, 255, 0.15);
-          box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
-        }
-
-        .text-input {
-          flex: 1;
-          background: transparent;
-          border: none;
-          outline: none;
-          color: white;
-          font-size: 16px;
-          padding: 16px 20px;
-          font-family: monospace;
-          letter-spacing: 2px;
-        }
-
-        .text-input::placeholder {
-          color: rgba(255, 255, 255, 0.5);
-          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-          letter-spacing: normal;
-        }
-
-        .enter-button {
-          background: linear-gradient(135deg, #6366f1, #8b5cf6);
-          border: none;
-          border-radius: 12px;
-          width: 48px;
-          height: 48px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          cursor: pointer;
-          transition: all 0.2s ease;
-          margin-right: 4px;
-        }
-
-        .enter-button:hover {
-          background: linear-gradient(135deg, #5855eb, #7c3aed);
-          transform: translateY(-1px);
-          box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
-        }
-
-        .enter-button:active {
-          transform: translateY(0);
-        }
-
-        .enter-button:disabled {
-          background: rgba(255, 255, 255, 0.1);
-          cursor: not-allowed;
-          transform: none;
-        }
-
-        .arrow-icon {
-          width: 20px;
-          height: 20px;
-          fill: white;
-          transition: transform 0.2s ease;
-        }
-
-        .enter-button:hover .arrow-icon {
-          transform: translateX(2px);
-        }
-    </style>
   </head>
-  <body style="margin:0; padding:0;">
-    <h1 style="font-family: 'Tuffy', sans-serif; color: white; text-align: center; margin-top:10vh;">Enter password</h1>
+  <body>
+    <h1>Enter password</h1>
     <div class="textbox-container">
       <div class="input-wrapper">
         <input type="password" class="text-input" placeholder="Enter here..." id="textInput">
@@ -112,63 +20,6 @@
         </button>
       </div>
     </div>
+    <script src="/static/locked.js"></script>
   </body>
-  <script>
-    const textInput = document.getElementById('textInput');
-    const enterButton = document.getElementById('enterButton');
-    const output = document.getElementById('output');
-
-    function sanitizeInput(input) {
-      return input
-        .replace(/[<>'"&]/g, '')
-        .replace(/[^\w\s\-_.@]/g, '')
-        .trim()
-        .substring(0, 70);
-    }
-
-    async function handleSubmit() {
-      const rawInput = textInput.value;
-
-      if (!rawInput.trim()) {
-        return;
-      }
-
-      const sanitizedInput = sanitizeInput(rawInput);
-
-      let link = window.location.href;
-      const arr = link.split("/");
-      const response = await fetch("/"+arr[arr.length-1], {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: 'password=' + encodeURIComponent(sanitizedInput)
-      });
-      textInput.value = '';
-      if (response.ok) {
-        sessionStorage.setItem('tmp',sanitizedInput);
-        document.open();
-        document.write(await response.text())
-        document.close();
-      } else if (response.status === 429) {
-        textInput.placeholder = 'Too many requests!';
-      } else {
-        textInput.placeholder = 'Incorrect!';
-      }
-    }
-
-    enterButton.addEventListener('click', handleSubmit);
-
-    textInput.addEventListener('keypress', function(e) {
-      if (e.key === 'Enter') {
-        handleSubmit();
-      }
-    });
-
-    textInput.addEventListener('input', function() {
-      enterButton.disabled = !textInput.value.trim();
-    });
-
-    enterButton.disabled = true;
-  </script>
 </html>
