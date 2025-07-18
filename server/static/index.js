@@ -177,7 +177,7 @@ async function saveInfo() {
       .replace(/[<>'"&]/g, '')
       .replace(/[^\w\s\-_.@]/g, '')
       .trim()
-      .substring(0, 100);
+      .substring(0, 70);
 
     info.sealed = true;
     formData.append('password',password);
