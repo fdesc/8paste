@@ -1,12 +1,13 @@
 package main
 
 import (
-	"html/template"
 	"encoding/json"
+	"html/template"
 	"unicode/utf8"
 	"net/http"
 	"strings"
 	"bytes"
+	"flag"
 	"sync"
 	"time"
 	"fmt"
@@ -370,9 +371,22 @@ func main() {
 	http.HandleFunc("/download",downloadHandler)
 	http.HandleFunc("/",idHandler)
 
-	port := "8080"
-	util.LogInfo("Starting server at port "+port)
-	err := http.ListenAndServe(":"+port,nil)
+	var port string
+	flag.StringVar(&port,"p","","Start the server at the specified port")
+	flag.Parse()
+	if port == "" {
+		util.LogError("A port must be specified! Exiting...",nil)
+		return
+	}
+
+	s := &http.Server{
+		Addr: ":"+port,
+		ReadTimeout: 30 * time.Second,
+		WriteTimeout: 30 * time.Second,
+	}
+
+	util.LogInfo("Started server at port "+port)
+	err := s.ListenAndServe()
 	if (err != nil) {
 		util.LogError("Server threw an error!",err)
 	}
