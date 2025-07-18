@@ -12,20 +12,20 @@ import (
 )
 
 type PasteInfo struct {
-	Title          string     `json:"title,omitempty"`
-	ID        	   uuid.UUID  `json:"-"`
-	Temporary 	   bool		    `json:"temporary,omitempty"`
-	Duration       string     `json:"duration,omitempty"`
+	Title string `json:"title,omitempty"`
+	ID uuid.UUID `json:"-"`
+	Temporary bool `json:"temporary,omitempty"`
+	Duration string `json:"duration,omitempty"`
 	ExpirationDate *time.Time `json:"-"`
-	Sealed    	   bool       `json:"sealed,omitempty"`
-	IsFile         bool       `json:"isfile"`
-	CreationDate   time.Time  `json:"-"`
-	Secrets        []byte     `json:"-"`
+	Sealed bool `json:"sealed,omitempty"`
+	IsFile bool  `json:"isfile"`
+	CreationDate time.Time `json:"-"`
+	Secrets []byte `json:"-"`
 }
 
 type Paste struct {
-	Info    PasteInfo `json:"info"`
-	Content []byte    `json:"-"`
+	Info PasteInfo `json:"info"`
+	Content []byte `json:"-"`
 }
 
 func CreatePaste(data []byte,title string,temp bool,isfile bool,sealed bool) Paste {

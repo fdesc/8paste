@@ -29,10 +29,10 @@ type PageData struct {
 	ContentData 	   string
 }
 
-var pasteStorage = 		  make(map[string]service.Paste)
+var pasteStorage = make(map[string]service.Paste)
 var expirationStorage = make(map[string]time.Time)
-var visitorStorage = 	  make(map[string]*Visitor)
-var storageMutex = 		  &sync.RWMutex{}
+var visitorStorage = make(map[string]*Visitor)
+var storageMutex = &sync.RWMutex{}
 
 func uploadHandler(w http.ResponseWriter, r *http.Request) {
 	setSecurityHeaders(w)
