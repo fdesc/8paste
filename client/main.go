@@ -178,7 +178,7 @@ func main() {
 	var target string
 
 	flag.Usage = func() {
-		fmt.Println("pasteur-client: Usage")
+		fmt.Println("8paste-client: Usage")
 		fmt.Println("  -u <content>:      Upload the specified content")
 		fmt.Println("  -g <ID>:           Get the content from ID")
 		fmt.Println("  -f <path>:         Upload the specified file from path")
