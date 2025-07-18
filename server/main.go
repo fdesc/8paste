@@ -29,10 +29,10 @@ type PageData struct {
 	ContentData 	   string
 }
 
-var pasteStorage = 		make(map[string]service.Paste)
+var pasteStorage = 		  make(map[string]service.Paste)
 var expirationStorage = make(map[string]time.Time)
-var visitorStorage = 	make(map[string]*Visitor)
-var storageMutex = 		&sync.RWMutex{}
+var visitorStorage = 	  make(map[string]*Visitor)
+var storageMutex = 		  &sync.RWMutex{}
 
 func uploadHandler(w http.ResponseWriter, r *http.Request) {
 	setSecurityHeaders(w)
@@ -108,10 +108,10 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 		expirationStorage[p.Info.ID.String()] = *p.Info.ExpirationDate
 	}
 
-    w.WriteHeader(http.StatusCreated)
-    json.NewEncoder(w).Encode(map[string]string{
-        "id": p.Info.ID.String(),
-    })
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(map[string]string{
+		"id": p.Info.ID.String(),
+	})
 	util.LogInfo("Uploaded paste")
 }
 
@@ -153,7 +153,7 @@ func downloadHandler(w http.ResponseWriter,r *http.Request) {
 		if len(pieces) != 2 || !service.VerifyPassword(pieces[0],pieces[1],password) || password == "" {
 			util.LogError("Invalid password submitted",nil)
 			http.Error(w, "Invalid password", http.StatusUnauthorized)
-            return
+			return
 		}
 	}
 
@@ -194,8 +194,8 @@ func infoHandler(w http.ResponseWriter,r *http.Request) {
 		return
 	}
 
-    w.WriteHeader(http.StatusCreated)
-    json.NewEncoder(w).Encode(p.Info)
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(p.Info)
 }
 
 func idHandler(w http.ResponseWriter,r *http.Request) {
@@ -230,7 +230,7 @@ func idHandler(w http.ResponseWriter,r *http.Request) {
 		if len(pieces) != 2 || !service.VerifyPassword(pieces[0],pieces[1],password) {
 			util.LogError("Invalid password submitted",nil)
 			http.Error(w, "Invalid password", http.StatusUnauthorized)
-            return
+			return
 		} else {
 			servePageContent(w,&p,"static/index.html")
 			return

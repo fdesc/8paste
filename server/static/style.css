@@ -6,22 +6,22 @@
 
 
 html::-webkit-scrollbar {
-    width: 6px;
+  width: 6px;
 }
 
 html::-webkit-scrollbar-track {
-    background: rgba(0, 0, 0, 0.05);
-    border-radius: 10px;
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 10px;
 }
 
 html::-webkit-scrollbar-thumb {
-    background: rgba(0, 0, 0, 0.3);
-    border-radius: 10px;
-    transition: background 0.3s ease;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 10px;
+  transition: background 0.3s ease;
 }
 
 html::-webkit-scrollbar-thumb:hover {
-    background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.5);
 }
 
 .bar {
@@ -348,27 +348,27 @@ p {
 }
 
 .modal::-webkit-scrollbar {
-    width: 6px;
+  width: 6px;
 }
 
 .modal::-webkit-scrollbar-track {
-    background: rgba(0, 0, 0, 0.05);
-    border-radius: 10px;
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 10px;
 }
 
 .modal::-webkit-scrollbar-thumb {
-    background: rgba(0, 0, 0, 0.3);
-    border-radius: 10px;
-    transition: background 0.3s ease;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 10px;
+  transition: background 0.3s ease;
 }
 
 .modal::-webkit-scrollbar-thumb:hover {
-    background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.5);
 }
 
 .modal {
-    scrollbar-width: thin;
-    scrollbar-color: rgba(0, 0, 0, 0.3) rgba(0, 0, 0, 0.05);
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.3) rgba(0, 0, 0, 0.05);
 }
 
 .modal-overlay.active .modal {

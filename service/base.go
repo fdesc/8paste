@@ -14,7 +14,7 @@ import (
 type PasteInfo struct {
 	Title          string     `json:"title,omitempty"`
 	ID        	   uuid.UUID  `json:"-"`
-	Temporary 	   bool		  `json:"temporary,omitempty"`
+	Temporary 	   bool		    `json:"temporary,omitempty"`
 	Duration       string     `json:"duration,omitempty"`
 	ExpirationDate *time.Time `json:"-"`
 	Sealed    	   bool       `json:"sealed,omitempty"`
@@ -25,7 +25,7 @@ type PasteInfo struct {
 
 type Paste struct {
 	Info    PasteInfo `json:"info"`
-	Content []byte     `json:"-"`
+	Content []byte    `json:"-"`
 }
 
 func CreatePaste(data []byte,title string,temp bool,isfile bool,sealed bool) Paste {
