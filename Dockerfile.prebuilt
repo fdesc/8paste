@@ -1,0 +1,21 @@
+FROM alpine:latest
+
+ARG RELEASE_VERSION
+ARG GOOS
+ARG GOARCH
+
+RUN apk add --no-cache curl tar
+
+WORKDIR /app
+
+RUN curl -L -o 8paste-server.tar.gz \
+    "https://github.com/fdesc/8paste/releases/download/v${RELEASE_VERSION}/8paste-server_${RELEASE_VERSION}_${GOOS}_${GOARCH}.tar.gz" && \
+    tar -xzf 8paste-server.tar.gz && \
+    rm 8paste-server.tar.gz \
+
+ENV PORT="8080"
+EXPOSE $PORT
+
+
+RUN chmod +x ./8paste-server
+CMD ["sh","-c","./8paste-server -p $PORT"]
