@@ -59,12 +59,12 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 
 	if info.IsFile {
 		file,_,err := r.FormFile("content")
-		defer file.Close()
 		if err != nil {
 			util.LogError("Failed to read form file",err)
 			http.Error(w,err.Error(),http.StatusInternalServerError)
 			return
 		}
+		defer file.Close()
 
 		buf := bytes.NewBuffer(nil)
 		_, err = io.Copy(buf, file)
@@ -90,15 +90,11 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w,"Password processing failed",http.StatusInternalServerError)
 			return
 		}
-		p.Info.Secrets = []byte(fmt.Sprintf("%s:%s",hash,salt))
+		p.Info.Secrets = fmt.Appendf([]byte("%s:%s"),hash,salt)
 	}
 	if p.Info.Temporary { p.SetExpirationDate(info.Duration) }
 	if len(p.Info.Title) > 40 {
 		p.Info.Title = p.Info.Title[0:41]
-	}
-
-	if err != nil {
-		util.LogError("Failed to upload paste content",err)
 	}
 
 	storageMutex.Lock()
