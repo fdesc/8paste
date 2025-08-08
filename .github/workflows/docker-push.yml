@@ -1,0 +1,32 @@
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        goos: [linux, darwin, windows]
+        goarch: [amd64, arm64, 386]
+    permissions:
+      packages: write
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to GHCR
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Build and Push Docker Image
+        run: |
+          IMAGE_TAG=ghcr.io/${{ github.repository_owner }}/prebuilt:${{ matrix.goos }}-${{ matrix.goarch }}
+          docker build \
+            --build-arg GOOS=${{ matrix.goos }} \
+            --build-arg GOARCH=${{ matrix.goarch }} \
+            -f Dockerfile.prebuilt \
+            -t $IMAGE_TAG .
+          docker push $IMAGE_TAG
+
