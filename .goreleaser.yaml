@@ -39,11 +39,19 @@ archives:
     ids:
       - client
     name_template: "{{ .ProjectName }}-client_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    files:
+      - "LICENSE"
+      - "README.md"
 
   - id: "server-archive"
     ids:
       - server
     name_template: "{{ .ProjectName }}-server_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    files:
+      - "LICENSE"
+      - "README.md"
+      - src: "server/static/*"
+        dst: static
 
 changelog:
   sort: asc
